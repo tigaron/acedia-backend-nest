@@ -1,0 +1,94 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Channel {
+  createdAt: DateTime!
+  id: String!
+  name: String!
+  profile: Profile!
+  profileId: String!
+  server: Server!
+  serverId: String!
+  type: ChannelTypeEnum!
+  updatedAt: DateTime!
+}
+
+"""Defines the type of a channel."""
+enum ChannelTypeEnum {
+  AUDIO
+  TEXT
+  VIDEO
+}
+
+input CreateProfileDto {
+  email: String!
+  imageUrl: String!
+  name: String!
+  userId: String!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Member {
+  createdAt: DateTime!
+  id: String!
+  profile: Profile!
+  profileId: String!
+  role: MemberRoleEnum!
+  server: Server!
+  serverId: String!
+  updatedAt: DateTime!
+}
+
+"""Defines the role of a member in a server."""
+enum MemberRoleEnum {
+  ADMIN
+  GUEST
+  MODERATOR
+}
+
+type Mutation {
+  createProfile(input: CreateProfileDto!): Profile!
+}
+
+type Profile {
+  channels: [Channel]
+  createdAt: DateTime!
+  email: String!
+  id: String!
+  imageUrl: String!
+  members: [Member]
+  name: String!
+  servers: [Server]
+  updatedAt: DateTime!
+  userId: String!
+}
+
+type Query {
+  getAllServersByProfileId(id: String!): [Server!]!
+  getChannelById(id: String!): Channel!
+  getMemberByServerId(profileId: String!, serverId: String!): Member!
+  getProfileByEmail(email: String!): Profile!
+  getProfileById(id: String!): Profile!
+  getServerById(profileId: String!, serverId: String!): Server!
+  getServerByProfileId(id: String!): Server!
+  getServerWithChannelById(profileId: String!, serverId: String!): Server!
+  getServerWithChannelMemberProfileById(profileId: String!, serverId: String!): Server!
+}
+
+type Server {
+  channels: [Channel!]!
+  createdAt: DateTime!
+  id: String!
+  imageUrl: String!
+  inviteCode: String!
+  members: [Member!]!
+  name: String!
+  profile: Profile!
+  profileId: String!
+  updatedAt: DateTime!
+}

@@ -5,6 +5,9 @@ import { join } from 'path';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { ChannelModule } from './channel/channel.module';
+import { MemberModule } from './member/member.module';
+import { ProfileModule } from './profile/profile.module';
 import { ServerModule } from './server/server.module';
 
 @Module({
@@ -26,6 +29,9 @@ import { ServerModule } from './server/server.module';
       },
     }),
     ServerModule,
+    ProfileModule,
+    MemberModule,
+    ChannelModule,
   ],
   controllers: [AppController],
   providers: [AppService],
