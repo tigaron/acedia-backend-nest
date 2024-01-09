@@ -97,18 +97,18 @@ enum MemberRoleEnum {
 }
 
 type Mutation {
-  createChannel(input: CreateChannelDto!): Server!
-  createInviteCode(input: CreateInviteCodeDto!): Server!
-  createMember(input: CreateMemberDto!): Server!
-  createProfile(input: CreateProfileDto!): Profile!
-  createServer(input: CreateServerDto!): Server!
-  deleteChannel(input: DeleteChannelDto!): Server!
-  deleteMember(input: DeleteMemberDto!): Server!
-  deleteServer(input: DeleteServerDto!): Server!
-  leaveServer(input: LeaveServerDto!): Server!
-  updateChannel(input: UpdateChannelDto!): Server!
-  updateMemberRole(input: UpdateMemberRoleDto!): Server!
-  updateServer(input: UpdateServerDto!): Server!
+  createChannel(input: CreateChannelDto!): Server
+  createInviteCode(input: CreateInviteCodeDto!): Server
+  createMember(input: CreateMemberDto!): Server
+  createProfile(input: CreateProfileDto!): Profile
+  createServer(input: CreateServerDto!): Server
+  deleteChannel(input: DeleteChannelDto!): Server
+  deleteMember(input: DeleteMemberDto!): Server
+  deleteServer(input: DeleteServerDto!): Server
+  leaveServer(input: LeaveServerDto!): Server
+  updateChannel(input: UpdateChannelDto!): Server
+  updateMemberRole(input: UpdateMemberRoleDto!): Server
+  updateServer(input: UpdateServerDto!): Server
 }
 
 type Profile {
@@ -125,15 +125,15 @@ type Profile {
 }
 
 type Query {
-  getAllServersByProfileId(profileId: String!): [Server!]!
-  getChannelById(id: String!): Channel!
-  getMemberByServerId(profileId: String!, serverId: String!): Member!
-  getProfileByUserId(userId: String!): Profile!
-  getServerById(id: String!, profileId: String!): Server!
-  getServerByInviteCode(inviteCode: String!, profileId: String!): Server!
-  getServerByProfileId(profileId: String!): Server!
-  getServerWithChannelById(id: String!, profileId: String!): Server!
-  getServerWithChannelMemberProfileById(id: String!, profileId: String!): Server!
+  getAllServersByProfileId(profileId: String!): [Server]
+  getChannelById(id: String!): Channel
+  getMemberByServerId(profileId: String!, serverId: String!): Member
+  getProfileByUserId(userId: String!): Profile
+  getServerById(id: String!, profileId: String!): Server
+  getServerByInviteCode(inviteCode: String!, profileId: String!): Server
+  getServerByProfileId(profileId: String!): Server
+  getServerWithChannelById(id: String!, profileId: String!): Server
+  getServerWithChannelMemberProfileById(id: String!, profileId: String!): Server
 }
 
 type Server {

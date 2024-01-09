@@ -12,13 +12,13 @@ export class ProfileResolver {
   constructor(private readonly profileService: ProfileService) {}
 
   @UseGuards(GraphqlAuthGuard)
-  @Mutation(() => Profile)
+  @Mutation(() => Profile, { nullable: true })
   async createProfile(@Args('input') input: CreateProfileDto) {
     return this.profileService.createProfile(input);
   }
 
   @UseGuards(GraphqlAuthGuard)
-  @Query(() => Profile)
+  @Query(() => Profile, { nullable: true })
   async getProfileByUserId(@Args('userId') userId: string) {
     return this.profileService.getProfileByUserId(userId);
   }
