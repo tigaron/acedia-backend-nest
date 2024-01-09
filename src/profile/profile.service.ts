@@ -1,6 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 
-import { Profile } from '@prisma/client';
 import { CreateProfileDto } from './profile.dto';
 
 import { PrismaService } from 'src/prisma.service';
@@ -9,24 +8,24 @@ import { PrismaService } from 'src/prisma.service';
 export class ProfileService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createProfile(createProfileDto: CreateProfileDto): Promise<Profile> {
+  async createProfile(createProfileDto: CreateProfileDto) {
     const profile = await this.prisma.profile.findUnique({
       where: {
         userId: createProfileDto.userId,
       },
     });
 
-    if (profile) return profile;
+    if (profile) throw new ConflictException('Profile already exists');
 
     return this.prisma.profile.create({
       data: createProfileDto,
     });
   }
 
-  async getProfileById(id: string): Promise<Profile> {
+  async getProfileByUserId(userId: string) {
     return this.prisma.profile.findUnique({
       where: {
-        userId: id,
+        userId,
       },
       include: {
         servers: {
