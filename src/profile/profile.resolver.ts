@@ -20,9 +20,4 @@ export class ProfileResolver {
   async getProfileById(@Args('id') id: string) {
     return this.profileService.getProfileById(id);
   }
-
-  @Query(() => Profile)
-  async getProfileByEmail(@Args('email') email: string) {
-    return this.profileService.getProfileByEmail(email);
-  }
 }

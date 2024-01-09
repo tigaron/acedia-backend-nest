@@ -37,19 +37,4 @@ export class ProfileService {
       },
     });
   }
-
-  async getProfileByEmail(email: string): Promise<Profile> {
-    return this.prisma.profile.findUnique({
-      where: {
-        email,
-      },
-      include: {
-        servers: {
-          include: {
-            channels: true,
-          },
-        },
-      },
-    });
-  }
 }
