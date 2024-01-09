@@ -72,7 +72,6 @@ type Query {
   getAllServersByProfileId(id: String!): [Server!]!
   getChannelById(id: String!): Channel!
   getMemberByServerId(profileId: String!, serverId: String!): Member!
-  getProfileByEmail(email: String!): Profile!
   getProfileById(id: String!): Profile!
   getServerById(profileId: String!, serverId: String!): Server!
   getServerByProfileId(id: String!): Server!

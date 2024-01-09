@@ -1,5 +1,7 @@
+import { UseGuards } from '@nestjs/common';
 import { Args, Query, Resolver } from '@nestjs/graphql';
 
+import { GraphqlAuthGuard } from 'src/auth/auth.guard';
 import { MemberService } from './member.service';
 import { Member } from './member.types';
 
@@ -7,6 +9,7 @@ import { Member } from './member.types';
 export class MemberResolver {
   constructor(private readonly memberService: MemberService) {}
 
+  @UseGuards(GraphqlAuthGuard)
   @Query(() => Member)
   async getMemberByServerId(
     @Args('serverId') serverId: string,
