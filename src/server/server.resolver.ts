@@ -107,7 +107,7 @@ export class ServerResolver {
   @UseGuards(GraphqlAuthGuard)
   @Query(() => [Server], { nullable: 'itemsAndList' })
   async getAllServersByProfileId(@Args('profileId') profileId: string) {
-    console.log('Get all servers by profile id input', { profileId });
+    // console.log('Get all servers by profile id input', { profileId });
 
     return this.serverService.getAllServersByProfileId(profileId);
   }
