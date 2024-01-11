@@ -1,44 +1,47 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 
-import {
-  CreateInviteCodeDto,
-  CreateServerDto,
-  DeleteServerDto,
-  LeaveServerDto,
-  UpdateServerDto,
-} from './server.dto';
+import { CreateServerDto, UpdateServerDto } from './server.dto';
 
+import { ChannelType, MemberRole } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class ServerService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createServer(createServerDto: CreateServerDto) {
+  async createServer(createServerDto: CreateServerDto, userId: string) {
+    const profile = await this.prisma.profile.findUnique({
+      where: { userId },
+    });
+
+    if (!profile)
+      throw new UnauthorizedException('You are not authorized for this action');
+
     return this.prisma.server.create({
       data: {
         ...createServerDto,
+        profileId: profile.id,
         inviteCode: uuidv4(),
         channels: {
           create: [
             {
               name: 'general',
-              type: 'TEXT',
-              profileId: createServerDto.profileId,
+              type: ChannelType.TEXT,
+              profileId: profile.id,
             },
             {
               name: 'Lounge',
-              type: 'AUDIO',
-              profileId: createServerDto.profileId,
+              type: ChannelType.AUDIO,
+              profileId: profile.id,
             },
           ],
         },
         members: {
           create: [
             {
-              profileId: createServerDto.profileId,
-              role: 'ADMIN',
+              profileId: profile.id,
+              role: MemberRole.ADMIN,
             },
           ],
         },
@@ -46,56 +49,83 @@ export class ServerService {
     });
   }
 
-  async updateServer(updateServerDto: UpdateServerDto) {
+  async updateServer(updateServerDto: UpdateServerDto, userId: string) {
+    const profile = await this.prisma.profile.findUnique({
+      where: { userId },
+    });
+
+    if (!profile)
+      throw new UnauthorizedException('You are not authorized for this action');
+
     return this.prisma.server.update({
       where: {
         id: updateServerDto.serverId,
-        profileId: updateServerDto.profileId,
+        profileId: profile.id,
       },
       data: {
-        name: updateServerDto.name,
-        imageUrl: updateServerDto.imageUrl,
+        ...updateServerDto,
       },
     });
   }
 
-  async deleteServer(deleteServerDto: DeleteServerDto) {
+  async deleteServer(id: string, userId: string) {
+    const profile = await this.prisma.profile.findUnique({
+      where: { userId },
+    });
+
+    if (!profile)
+      throw new UnauthorizedException('You are not authorized for this action');
+
     return this.prisma.server.delete({
       where: {
-        id: deleteServerDto.serverId,
-        profileId: deleteServerDto.profileId,
+        id,
+        profileId: profile.id,
       },
     });
   }
 
-  async leaveServer(leaveServerDto: LeaveServerDto) {
+  async leaveServer(id: string, userId: string) {
+    const profile = await this.prisma.profile.findUnique({
+      where: { userId },
+    });
+
+    if (!profile)
+      throw new UnauthorizedException('You are not authorized for this action');
+
     return this.prisma.server.update({
       where: {
-        id: leaveServerDto.serverId,
+        id,
         profileId: {
-          not: leaveServerDto.profileId,
+          not: profile.id,
         },
         members: {
           some: {
-            profileId: leaveServerDto.profileId,
+            profileId: profile.id,
           },
         },
       },
       data: {
         members: {
           deleteMany: {
-            profileId: leaveServerDto.profileId,
+            profileId: profile.id,
           },
         },
       },
     });
   }
 
-  async createInviteCode(createInviteCodeDto: CreateInviteCodeDto) {
+  async createInviteCode(id: string, userId: string) {
+    const profile = await this.prisma.profile.findUnique({
+      where: { userId },
+    });
+
+    if (!profile)
+      throw new UnauthorizedException('You are not authorized for this action');
+
     return this.prisma.server.update({
       where: {
-        id: createInviteCodeDto.serverId,
-        profileId: createInviteCodeDto.profileId,
+        id,
+        profileId: profile.id,
       },
       data: {
         inviteCode: uuidv4(),

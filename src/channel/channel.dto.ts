@@ -11,11 +11,6 @@ export class CreateChannelDto {
 
   @IsString()
   @IsNotEmpty()
-  @Field()
-  profileId: string;
-
-  @IsString()
-  @IsNotEmpty()
   @IsNotIn(['general'])
   @Field()
   name: string;
@@ -31,11 +26,6 @@ export class UpdateChannelDto {
   @IsNotEmpty()
   @Field()
   serverId: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @Field()
-  profileId: string;
 
   @IsString()
   @IsNotEmpty()
@@ -59,11 +49,6 @@ export class DeleteChannelDto {
   @IsNotEmpty()
   @Field()
   serverId: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @Field()
-  profileId: string;
 
   @IsString()
   @IsNotEmpty()

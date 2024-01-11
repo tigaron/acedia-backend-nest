@@ -1,13 +1,9 @@
 import { UseGuards } from '@nestjs/common';
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 
 import { GraphqlAuthGuard } from 'src/auth/auth.guard';
 import { Server } from 'src/server/server.types';
-import {
-  CreateMemberDto,
-  DeleteMemberDto,
-  UpdateMemberRoleDto,
-} from './member.dto';
+import { DeleteMemberDto, UpdateMemberRoleDto } from './member.dto';
 import { MemberService } from './member.service';
 import { Member } from './member.types';
 
@@ -17,20 +13,47 @@ export class MemberResolver {
 
   @UseGuards(GraphqlAuthGuard)
   @Mutation(() => Server, { nullable: true })
-  async createMember(@Args('input') input: CreateMemberDto) {
-    return this.memberService.createMember(input);
+  async createMember(
+    @Args('inviteCode') inviteCode: string,
+    @Context() ctx: { req: Request },
+  ) {
+    const user = ctx.req['user'];
+    const userId = user?.id;
+
+    // console.log('User from context', { user });
+    // console.log('Invite code from input', { inviteCode });
+
+    return this.memberService.createMember(inviteCode, userId);
   }
 
   @UseGuards(GraphqlAuthGuard)
   @Mutation(() => Server, { nullable: true })
-  async updateMemberRole(@Args('input') input: UpdateMemberRoleDto) {
-    return this.memberService.updateMemberRole(input);
+  async updateMemberRole(
+    @Args('input') input: UpdateMemberRoleDto,
+    @Context() ctx: { req: Request },
+  ) {
+    const user = ctx.req['user'];
+    const userId = user?.id;
+
+    // console.log('User from context', { user });
+    // console.log('Update member role input', { input });
+
+    return this.memberService.updateMemberRole(input, userId);
   }
 
   @UseGuards(GraphqlAuthGuard)
   @Mutation(() => Server, { nullable: true })
-  async deleteMember(@Args('input') input: DeleteMemberDto) {
-    return this.memberService.deleteMember(input);
+  async deleteMember(
+    @Args('input') input: DeleteMemberDto,
+    @Context() ctx: { req: Request },
+  ) {
+    const user = ctx.req['user'];
+    const userId = user?.id;
+
+    // console.log('User from context', { user });
+    // console.log('Delete member input', { input });
+
+    return this.memberService.deleteMember(input, userId);
   }
 
   @UseGuards(GraphqlAuthGuard)
@@ -39,6 +62,11 @@ export class MemberResolver {
     @Args('serverId') serverId: string,
     @Args('profileId') profileId: string,
   ) {
+    // console.log('Get member by server id input', {
+    //   serverId,
+    //   profileId,
+    // });
+
     return this.memberService.getMemberByServerId(serverId, profileId);
   }
 }

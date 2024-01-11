@@ -3,29 +3,11 @@ import { MemberRole } from '@prisma/client';
 import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
 
 @InputType()
-export class CreateMemberDto {
-  @IsString()
-  @IsNotEmpty()
-  @Field()
-  inviteCode: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @Field()
-  profileId: string;
-}
-
-@InputType()
 export class UpdateMemberRoleDto {
   @IsString()
   @IsNotEmpty()
   @Field()
   serverId: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @Field()
-  profileId: string;
 
   @IsString()
   @IsNotEmpty()
@@ -43,11 +25,6 @@ export class DeleteMemberDto {
   @IsNotEmpty()
   @Field()
   serverId: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @Field()
-  profileId: string;
 
   @IsString()
   @IsNotEmpty()

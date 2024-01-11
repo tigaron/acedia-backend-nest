@@ -14,12 +14,16 @@ export class ProfileResolver {
   @UseGuards(GraphqlAuthGuard)
   @Mutation(() => Profile, { nullable: true })
   async createProfile(@Args('input') input: CreateProfileDto) {
+    // console.log('Create profile input', { input });
+
     return this.profileService.createProfile(input);
   }
 
   @UseGuards(GraphqlAuthGuard)
   @Query(() => Profile, { nullable: true })
   async getProfileByUserId(@Args('userId') userId: string) {
+    // console.log('Get profile by user id', { userId });
+
     return this.profileService.getProfileByUserId(userId);
   }
 }

@@ -6,6 +6,7 @@ import {
   Server as ServerType,
 } from '@prisma/client';
 
+import { Message } from 'src/message/message.types';
 import { Profile } from 'src/profile/profile.types';
 import { Server } from 'src/server/server.types';
 
@@ -31,6 +32,9 @@ export class Channel {
 
   @Field(() => Server)
   server: ServerType;
+
+  @Field(() => [Message], { nullable: 'itemsAndList' })
+  messages: Message[];
 
   @Field()
   createdAt: Date;

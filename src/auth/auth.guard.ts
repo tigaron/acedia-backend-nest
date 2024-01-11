@@ -15,7 +15,18 @@ export class GraphqlAuthGuard implements CanActivate {
     const gqlCtx = context.getArgByIndex(2);
     const request: Request = gqlCtx.req;
 
+    /*     console.log('Authenticating request', {
+      request: {
+        method: request.method,
+        url: request.url,
+        headers: request.headers,
+        body: request.body,
+      },
+    }); */
+
     const token = this.extractToken(request);
+
+    // console.log('Extracted token', { token });
 
     if (!token) throw new UnauthorizedException('Unauthorized');
 
@@ -25,7 +36,9 @@ export class GraphqlAuthGuard implements CanActivate {
         algorithms: ['RS256'],
       });
 
-      request['profile'] = payload;
+      // console.log('Verified token', { payload });
+
+      request['user'] = payload;
     } catch (error) {
       throw new UnauthorizedException('Unauthorized');
     }

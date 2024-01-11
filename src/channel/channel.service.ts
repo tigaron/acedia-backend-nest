@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 
 import { MemberRole } from '@prisma/client';
 
@@ -13,13 +13,20 @@ import {
 export class ChannelService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createChannel(createChannelDto: CreateChannelDto) {
+  async createChannel(createChannelDto: CreateChannelDto, userId: string) {
+    const profile = await this.prisma.profile.findUnique({
+      where: { userId },
+    });
+
+    if (!profile)
+      throw new UnauthorizedException('You are not authorized for this action');
+
     return this.prisma.server.update({
       where: {
         id: createChannelDto.serverId,
         members: {
           some: {
-            profileId: createChannelDto.profileId,
+            profileId: profile.id,
             role: {
               in: [MemberRole.ADMIN, MemberRole.MODERATOR],
             },
@@ -32,7 +39,7 @@ export class ChannelService {
             {
               name: createChannelDto.name,
               type: createChannelDto.type,
-              profileId: createChannelDto.profileId,
+              profileId: profile.id,
             },
           ],
         },
@@ -40,13 +47,20 @@ export class ChannelService {
     });
   }
 
-  async updateChannel(updateChannelDto: UpdateChannelDto) {
+  async updateChannel(updateChannelDto: UpdateChannelDto, userId: string) {
+    const profile = await this.prisma.profile.findUnique({
+      where: { userId },
+    });
+
+    if (!profile)
+      throw new UnauthorizedException('You are not authorized for this action');
+
     return this.prisma.server.update({
       where: {
         id: updateChannelDto.serverId,
         members: {
           some: {
-            profileId: updateChannelDto.profileId,
+            profileId: profile.id,
             role: {
               in: [MemberRole.ADMIN, MemberRole.MODERATOR],
             },
@@ -72,13 +86,20 @@ export class ChannelService {
     });
   }
 
-  async deleteChannel(deleteChannelDto: DeleteChannelDto) {
+  async deleteChannel(deleteChannelDto: DeleteChannelDto, userId: string) {
+    const profile = await this.prisma.profile.findUnique({
+      where: { userId },
+    });
+
+    if (!profile)
+      throw new UnauthorizedException('You are not authorized for this action');
+
     return this.prisma.server.update({
       where: {
         id: deleteChannelDto.serverId,
         members: {
           some: {
-            profileId: deleteChannelDto.profileId,
+            profileId: profile.id,
             role: {
               in: [MemberRole.ADMIN, MemberRole.MODERATOR],
             },

@@ -1,25 +1,28 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { Server } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
-import {
-  CreateMemberDto,
-  DeleteMemberDto,
-  UpdateMemberRoleDto,
-} from './member.dto';
+import { DeleteMemberDto, UpdateMemberRoleDto } from './member.dto';
 
 @Injectable()
 export class MemberService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createMember(createMemberDto: CreateMemberDto) {
+  async createMember(inviteCode: string, userId: string) {
+    const profile = await this.prisma.profile.findUnique({
+      where: { userId },
+    });
+
+    if (!profile)
+      throw new UnauthorizedException('You are not authorized for this action');
+
     return this.prisma.server.update({
       where: {
-        inviteCode: createMemberDto.inviteCode,
+        inviteCode,
       },
       data: {
         members: {
           create: {
-            profileId: createMemberDto.profileId,
+            profileId: profile.id,
           },
         },
       },
@@ -28,11 +31,19 @@ export class MemberService {
 
   async updateMemberRole(
     updateMemberRoleDto: UpdateMemberRoleDto,
+    userId: string,
   ): Promise<Server> {
+    const profile = await this.prisma.profile.findUnique({
+      where: { userId },
+    });
+
+    if (!profile)
+      throw new UnauthorizedException('You are not authorized for this action');
+
     return this.prisma.server.update({
       where: {
         id: updateMemberRoleDto.serverId,
-        profileId: updateMemberRoleDto.profileId,
+        profileId: profile.id,
       },
       data: {
         members: {
@@ -40,7 +51,7 @@ export class MemberService {
             where: {
               id: updateMemberRoleDto.memberId,
               profileId: {
-                not: updateMemberRoleDto.profileId,
+                not: profile.id,
               },
             },
             data: {
@@ -62,18 +73,25 @@ export class MemberService {
     });
   }
 
-  async deleteMember(deleteMemberDto: DeleteMemberDto) {
+  async deleteMember(deleteMemberDto: DeleteMemberDto, userId: string) {
+    const profile = await this.prisma.profile.findUnique({
+      where: { userId },
+    });
+
+    if (!profile)
+      throw new UnauthorizedException('You are not authorized for this action');
+
     return this.prisma.server.update({
       where: {
         id: deleteMemberDto.serverId,
-        profileId: deleteMemberDto.profileId,
+        profileId: profile.id,
       },
       data: {
         members: {
           delete: {
             id: deleteMemberDto.memberId,
             profileId: {
-              not: deleteMemberDto.profileId,
+              not: profile.id,
             },
           },
         },
@@ -96,6 +114,9 @@ export class MemberService {
       where: {
         serverId,
         profileId,
+      },
+      include: {
+        profile: true,
       },
     });
   }

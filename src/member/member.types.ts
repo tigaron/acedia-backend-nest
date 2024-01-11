@@ -1,11 +1,14 @@
 import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
 
 import {
+  Conversation as ConversationType,
   MemberRole as MemberRoleEnum,
   Profile as ProfileType,
   Server as ServerType,
 } from '@prisma/client';
 
+import { Conversation } from 'src/conversation/conversation.types';
+import { DirectMessage, Message } from 'src/message/message.types';
 import { Profile } from 'src/profile/profile.types';
 import { Server } from 'src/server/server.types';
 
@@ -28,6 +31,18 @@ export class Member {
 
   @Field(() => Server)
   server: ServerType;
+
+  @Field(() => [Message], { nullable: 'itemsAndList' })
+  messages: Message[];
+
+  @Field(() => [DirectMessage], { nullable: 'itemsAndList' })
+  directMessages: DirectMessage[];
+
+  @Field(() => [Conversation], { nullable: 'itemsAndList' })
+  conversationsInitiated: ConversationType[];
+
+  @Field(() => [Conversation], { nullable: 'itemsAndList' })
+  conversationsReceived: ConversationType[];
 
   @Field()
   createdAt: Date;

@@ -5,6 +5,7 @@
 type Channel {
   createdAt: DateTime!
   id: String!
+  messages: [Message]
   name: String!
   profile: Profile!
   profileId: String!
@@ -21,21 +22,29 @@ enum ChannelTypeEnum {
   VIDEO
 }
 
+type Conversation {
+  createdAt: DateTime!
+  directMessages: [DirectMessage]
+  id: String!
+  memberOne: Member!
+  memberOneId: String!
+  memberTwo: Member!
+  memberTwoId: String!
+  updatedAt: DateTime!
+}
+
 input CreateChannelDto {
   name: String!
-  profileId: String!
   serverId: String!
   type: ChannelTypeEnum!
 }
 
-input CreateInviteCodeDto {
-  profileId: String!
+input CreateMessageDto {
+  channelId: String!
+  content: String!
+  fileUrl: String
+  memberId: String!
   serverId: String!
-}
-
-input CreateMemberDto {
-  inviteCode: String!
-  profileId: String!
 }
 
 input CreateProfileDto {
@@ -48,7 +57,6 @@ input CreateProfileDto {
 input CreateServerDto {
   imageUrl: String!
   name: String!
-  profileId: String!
 }
 
 """
@@ -58,29 +66,41 @@ scalar DateTime
 
 input DeleteChannelDto {
   channelId: String!
-  profileId: String!
   serverId: String!
 }
 
 input DeleteMemberDto {
   memberId: String!
-  profileId: String!
   serverId: String!
 }
 
-input DeleteServerDto {
-  profileId: String!
+input DeleteMessageDto {
+  channelId: String!
+  memberId: String!
+  messageId: String!
   serverId: String!
 }
 
-input LeaveServerDto {
-  profileId: String!
-  serverId: String!
+type DirectMessage {
+  content: String!
+  conversation: Conversation!
+  conversationId: String!
+  createdAt: DateTime!
+  deleted: Boolean!
+  fileUrl: String
+  id: String!
+  member: Member!
+  memberId: String!
+  updatedAt: DateTime!
 }
 
 type Member {
+  conversationsInitiated: [Conversation]
+  conversationsReceived: [Conversation]
   createdAt: DateTime!
+  directMessages: [DirectMessage]
   id: String!
+  messages: [Message]
   profile: Profile!
   profileId: String!
   role: MemberRoleEnum!
@@ -96,18 +116,39 @@ enum MemberRoleEnum {
   MODERATOR
 }
 
+type Message {
+  channel: Channel!
+  channelId: String!
+  content: String!
+  createdAt: DateTime!
+  deleted: Boolean!
+  fileUrl: String
+  id: String!
+  member: Member!
+  memberId: String!
+  updatedAt: DateTime!
+}
+
+type MessagesResult {
+  messages: [Message]
+  nextCursor: String
+}
+
 type Mutation {
   createChannel(input: CreateChannelDto!): Server
-  createInviteCode(input: CreateInviteCodeDto!): Server
-  createMember(input: CreateMemberDto!): Server
+  createInviteCode(id: String!): Server
+  createMember(inviteCode: String!): Server
+  createMessage(input: CreateMessageDto!): Message
   createProfile(input: CreateProfileDto!): Profile
   createServer(input: CreateServerDto!): Server
   deleteChannel(input: DeleteChannelDto!): Server
   deleteMember(input: DeleteMemberDto!): Server
-  deleteServer(input: DeleteServerDto!): Server
-  leaveServer(input: LeaveServerDto!): Server
+  deleteMessage(input: DeleteMessageDto!): Message
+  deleteServer(id: String!): Server
+  leaveServer(id: String!): Server
   updateChannel(input: UpdateChannelDto!): Server
   updateMemberRole(input: UpdateMemberRoleDto!): Server
+  updateMessage(input: UpdateMessageDto!): Message
   updateServer(input: UpdateServerDto!): Server
 }
 
@@ -125,7 +166,9 @@ type Profile {
 }
 
 type Query {
+  fetchConversation(memberOneId: String!, memberTwoId: String!): Conversation
   getAllServersByProfileId(profileId: String!): [Server]
+  getBatchMessages(channelId: String!, cursor: String): MessagesResult
   getChannelById(id: String!): Channel
   getMemberByServerId(profileId: String!, serverId: String!): Member
   getProfileByUserId(userId: String!): Profile
@@ -149,24 +192,35 @@ type Server {
   updatedAt: DateTime!
 }
 
+type Subscription {
+  messageCreated(channelId: String!): Message
+  messageDeleted(channelId: String!): Message
+  messageUpdated(channelId: String!): Message
+}
+
 input UpdateChannelDto {
   channelId: String!
   name: String!
-  profileId: String!
   serverId: String!
   type: ChannelTypeEnum!
 }
 
 input UpdateMemberRoleDto {
   memberId: String!
-  profileId: String!
   role: MemberRoleEnum!
+  serverId: String!
+}
+
+input UpdateMessageDto {
+  channelId: String!
+  content: String!
+  memberId: String!
+  messageId: String!
   serverId: String!
 }
 
 input UpdateServerDto {
   imageUrl: String!
   name: String!
-  profileId: String!
   serverId: String!
 }
