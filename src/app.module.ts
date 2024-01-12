@@ -13,6 +13,7 @@ import { ProfileModule } from './profile/profile.module';
 import { ServerModule } from './server/server.module';
 import { TokenModule } from './token/token.module';
 import { TokenService } from './token/token.service';
+import { DirectMessageModule } from './direct-message/direct-message.module';
 
 @Module({
   imports: [
@@ -76,6 +77,7 @@ import { TokenService } from './token/token.service';
     ConversationModule,
     MessageModule,
     TokenModule,
+    DirectMessageModule,
   ],
   controllers: [AppController],
   providers: [AppService],

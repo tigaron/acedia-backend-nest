@@ -4,21 +4,15 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-
+import { DirectMessage, MemberRole } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
-
-import { MemberRole, Message } from '@prisma/client';
-import {
-  CreateMessageDto,
-  DeleteMessageDto,
-  UpdateMessageDto,
-} from './message.dto';
+import { CreateDMDto, DeleteDMDto, UpdateDMDto } from './direct-message.dto';
 
 @Injectable()
-export class MessageService {
+export class DirectMessageService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createMessage(createMessageDto: CreateMessageDto, userId: string) {
+  async createDM(createDMDto: CreateDMDto, userId: string) {
     const profile = await this.prisma.profile.findUnique({
       where: { userId },
     });
@@ -26,46 +20,53 @@ export class MessageService {
     if (!profile)
       throw new UnauthorizedException('You are not authorized for this action');
 
-    const server = await this.prisma.server.findFirst({
+    const conversation = await this.prisma.conversation.findFirst({
       where: {
-        id: createMessageDto.serverId,
-        members: {
-          some: {
-            profileId: profile.id,
+        id: createDMDto.conversationId,
+        OR: [
+          {
+            memberOne: {
+              profileId: profile.id,
+            },
+          },
+          {
+            memberTwo: {
+              profileId: profile.id,
+            },
+          },
+        ],
+      },
+      include: {
+        memberOne: {
+          include: {
+            profile: true,
+          },
+        },
+        memberTwo: {
+          include: {
+            profile: true,
           },
         },
       },
-      include: {
-        members: true,
-      },
     });
 
-    if (!server) throw new NotFoundException('Server not found');
+    if (!conversation) throw new NotFoundException('Conversation not found');
 
-    const channel = await this.prisma.channel.findFirst({
-      where: {
-        id: createMessageDto.channelId,
-        serverId: server.id,
-      },
-    });
-
-    if (!channel) throw new NotFoundException('Channel not found');
-
-    const member = server.members.find(
-      member => member.profileId === profile.id,
-    );
+    const member =
+      conversation.memberOne.profileId === profile.id
+        ? conversation.memberOne
+        : conversation.memberTwo;
 
     if (!member) throw new NotFoundException('Member not found');
 
-    return this.prisma.message.create({
+    return this.prisma.directMessage.create({
       data: {
-        content: createMessageDto.content,
-        fileUrl: createMessageDto.fileUrl,
-        channelId: channel.id,
+        content: createDMDto.content,
+        fileUrl: createDMDto.fileUrl,
+        conversationId: createDMDto.conversationId,
         memberId: member.id,
       },
       include: {
-        channel: true,
         member: {
           include: {
             profile: true,
@@ -75,7 +76,7 @@ export class MessageService {
     });
   }
 
-  async updateMessage(updateMessageDto: UpdateMessageDto, userId: string) {
+  async updateDM(updateDMDto: UpdateDMDto, userId: string) {
     const profile = await this.prisma.profile.findUnique({
       where: { userId },
     });
@@ -83,44 +84,51 @@ export class MessageService {
     if (!profile)
       throw new UnauthorizedException('You are not authorized for this action');
 
-    const server = await this.prisma.server.findFirst({
+    const conversation = await this.prisma.conversation.findFirst({
       where: {
-        id: updateMessageDto.serverId,
-        members: {
-          some: {
-            profileId: profile.id,
+        id: updateDMDto.conversationId,
+        OR: [
+          {
+            memberOne: {
+              profileId: profile.id,
+            },
+          },
+          {
+            memberTwo: {
+              profileId: profile.id,
+            },
+          },
+        ],
+      },
+      include: {
+        memberOne: {
+          include: {
+            profile: true,
+          },
+        },
+        memberTwo: {
+          include: {
+            profile: true,
           },
         },
       },
-      include: {
-        members: true,
-      },
     });
 
-    if (!server) throw new NotFoundException('Server not found');
+    if (!conversation) throw new NotFoundException('Conversation not found');
 
-    const channel = await this.prisma.channel.findFirst({
-      where: {
-        id: updateMessageDto.channelId,
-        serverId: server.id,
-      },
-    });
-
-    if (!channel) throw new NotFoundException('Channel not found');
-
-    const member = server.members.find(
-      member => member.profileId === profile.id,
-    );
+    const member =
+      conversation.memberOne.profileId === profile.id
+        ? conversation.memberOne
+        : conversation.memberTwo;
 
     if (!member) throw new NotFoundException('Member not found');
 
-    const message = await this.prisma.message.findFirst({
+    const message = await this.prisma.directMessage.findFirst({
       where: {
-        id: updateMessageDto.messageId,
-        channelId: channel.id,
+        id: updateDMDto.dmId,
+        conversationId: conversation.id,
       },
       include: {
-        channel: true,
         member: {
           include: {
             profile: true,
@@ -143,10 +151,10 @@ export class MessageService {
     if (!isMessageOwner)
       throw new ForbiddenException('You cannot edit this message');
 
-    return this.prisma.message.update({
+    return this.prisma.directMessage.update({
       where: { id: message.id },
       data: {
-        content: updateMessageDto.content,
+        content: updateDMDto.content,
       },
       include: {
         member: {
@@ -158,7 +166,7 @@ export class MessageService {
     });
   }
 
-  async deleteMessage(deleteMessageDto: DeleteMessageDto, userId: string) {
+  async deleteDM(deleteDMDto: DeleteDMDto, userId: string) {
     const profile = await this.prisma.profile.findUnique({
       where: { userId },
     });
@@ -166,44 +174,51 @@ export class MessageService {
     if (!profile)
       throw new UnauthorizedException('You are not authorized for this action');
 
-    const server = await this.prisma.server.findFirst({
+    const conversation = await this.prisma.conversation.findFirst({
       where: {
-        id: deleteMessageDto.serverId,
-        members: {
-          some: {
-            profileId: profile.id,
+        id: deleteDMDto.conversationId,
+        OR: [
+          {
+            memberOne: {
+              profileId: profile.id,
+            },
+          },
+          {
+            memberTwo: {
+              profileId: profile.id,
+            },
+          },
+        ],
+      },
+      include: {
+        memberOne: {
+          include: {
+            profile: true,
+          },
+        },
+        memberTwo: {
+          include: {
+            profile: true,
           },
         },
       },
-      include: {
-        members: true,
-      },
     });
 
-    if (!server) throw new NotFoundException('Server not found');
+    if (!conversation) throw new NotFoundException('Conversation not found');
 
-    const channel = await this.prisma.channel.findFirst({
-      where: {
-        id: deleteMessageDto.channelId,
-        serverId: server.id,
-      },
-    });
-
-    if (!channel) throw new NotFoundException('Channel not found');
-
-    const member = server.members.find(
-      member => member.profileId === profile.id,
-    );
+    const member =
+      conversation.memberOne.profileId === profile.id
+        ? conversation.memberOne
+        : conversation.memberTwo;
 
     if (!member) throw new NotFoundException('Member not found');
 
-    const message = await this.prisma.message.findFirst({
+    const message = await this.prisma.directMessage.findFirst({
       where: {
-        id: deleteMessageDto.messageId,
-        channelId: channel.id,
+        id: deleteDMDto.dmId,
+        conversationId: conversation.id,
       },
       include: {
-        channel: true,
         member: {
           include: {
             profile: true,
@@ -223,7 +238,7 @@ export class MessageService {
     if (!canModify)
       throw new ForbiddenException('You cannot modify this message');
 
-    return this.prisma.message.update({
+    return this.prisma.directMessage.update({
       where: { id: message.id },
       data: {
         fileUrl: null,
@@ -231,7 +246,6 @@ export class MessageService {
         deleted: true,
       },
       include: {
-        channel: true,
         member: {
           include: {
             profile: true,
@@ -241,7 +255,7 @@ export class MessageService {
     });
   }
 
-  async getBatchMessages(channelId: string, cursor: string, userId: string) {
+  async getBatchDMs(conversationId: string, cursor: string, userId: string) {
     const profile = await this.prisma.profile.findUnique({
       where: { userId },
     });
@@ -251,17 +265,17 @@ export class MessageService {
 
     const MESSAGES_BATCH = 10;
 
-    let messages: Message[] = [];
+    let messages: DirectMessage[] = [];
 
     if (cursor) {
-      messages = await this.prisma.message.findMany({
+      messages = await this.prisma.directMessage.findMany({
         take: MESSAGES_BATCH,
         skip: 1,
         cursor: {
           id: cursor,
         },
         where: {
-          channelId,
+          conversationId,
         },
         include: {
           member: {
@@ -275,10 +289,10 @@ export class MessageService {
         },
       });
     } else {
-      messages = await this.prisma.message.findMany({
+      messages = await this.prisma.directMessage.findMany({
         take: MESSAGES_BATCH,
         where: {
-          channelId,
+          conversationId,
         },
         include: {
           member: {

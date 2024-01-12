@@ -39,6 +39,12 @@ input CreateChannelDto {
   type: ChannelTypeEnum!
 }
 
+input CreateDMDto {
+  content: String!
+  conversationId: String!
+  fileUrl: String
+}
+
 input CreateMessageDto {
   channelId: String!
   content: String!
@@ -59,6 +65,11 @@ input CreateServerDto {
   name: String!
 }
 
+type DMsResult {
+  messages: [DirectMessage]
+  nextCursor: String
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
@@ -67,6 +78,11 @@ scalar DateTime
 input DeleteChannelDto {
   channelId: String!
   serverId: String!
+}
+
+input DeleteDMDto {
+  conversationId: String!
+  dmId: String!
 }
 
 input DeleteMemberDto {
@@ -136,17 +152,20 @@ type MessagesResult {
 
 type Mutation {
   createChannel(input: CreateChannelDto!): Server
+  createDM(input: CreateDMDto!): DirectMessage
   createInviteCode(id: String!): Server
   createMember(inviteCode: String!): Server
   createMessage(input: CreateMessageDto!): Message
   createProfile(input: CreateProfileDto!): Profile
   createServer(input: CreateServerDto!): Server
   deleteChannel(input: DeleteChannelDto!): Server
+  deleteDM(input: DeleteDMDto!): DirectMessage
   deleteMember(input: DeleteMemberDto!): Server
   deleteMessage(input: DeleteMessageDto!): Message
   deleteServer(id: String!): Server
   leaveServer(id: String!): Server
   updateChannel(input: UpdateChannelDto!): Server
+  updateDM(input: UpdateDMDto!): DirectMessage
   updateMemberRole(input: UpdateMemberRoleDto!): Server
   updateMessage(input: UpdateMessageDto!): Message
   updateServer(input: UpdateServerDto!): Server
@@ -168,6 +187,7 @@ type Profile {
 type Query {
   fetchConversation(memberOneId: String!, memberTwoId: String!): Conversation
   getAllServersByProfileId(profileId: String!): [Server]
+  getBatchDMs(conversationId: String!, cursor: String): DMsResult
   getBatchMessages(channelId: String!, cursor: String): MessagesResult
   getChannelById(id: String!): Channel
   getMemberByServerId(profileId: String!, serverId: String!): Member
@@ -193,6 +213,9 @@ type Server {
 }
 
 type Subscription {
+  dmCreated(conversationId: String!): DirectMessage
+  dmDeleted(conversationId: String!): DirectMessage
+  dmUpdated(conversationId: String!): DirectMessage
   messageCreated(channelId: String!): Message
   messageDeleted(channelId: String!): Message
   messageUpdated(channelId: String!): Message
@@ -203,6 +226,12 @@ input UpdateChannelDto {
   name: String!
   serverId: String!
   type: ChannelTypeEnum!
+}
+
+input UpdateDMDto {
+  content: String!
+  conversationId: String!
+  dmId: String!
 }
 
 input UpdateMemberRoleDto {

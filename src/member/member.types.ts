@@ -8,7 +8,8 @@ import {
 } from '@prisma/client';
 
 import { Conversation } from 'src/conversation/conversation.types';
-import { DirectMessage, Message } from 'src/message/message.types';
+import { DirectMessage } from 'src/direct-message/direct-message.types';
+import { Message } from 'src/message/message.types';
 import { Profile } from 'src/profile/profile.types';
 import { Server } from 'src/server/server.types';
 

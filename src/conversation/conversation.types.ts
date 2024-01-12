@@ -1,9 +1,9 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 
 import { Member as MemberType } from '@prisma/client';
+import { DirectMessage } from 'src/direct-message/direct-message.types';
 
 import { Member } from 'src/member/member.types';
-import { DirectMessage } from 'src/message/message.types';
 
 @ObjectType()
 export class Conversation {

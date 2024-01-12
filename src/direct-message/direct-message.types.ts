@@ -1,12 +1,15 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 
-import { Channel as ChannelType, Member as MemberType } from '@prisma/client';
+import {
+  Conversation as ConversationType,
+  Member as MemberType,
+} from '@prisma/client';
 
-import { Channel } from 'src/channel/channel.types';
+import { Conversation } from 'src/conversation/conversation.types';
 import { Member } from 'src/member/member.types';
 
 @ObjectType()
-export class Message {
+export class DirectMessage {
   @Field()
   id: string;
 
@@ -23,10 +26,10 @@ export class Message {
   member: MemberType;
 
   @Field()
-  channelId: string;
+  conversationId: string;
 
-  @Field(() => Channel)
-  channel: ChannelType;
+  @Field(() => Conversation)
+  conversation: ConversationType;
 
   @Field()
   deleted: boolean;
@@ -39,9 +42,9 @@ export class Message {
 }
 
 @ObjectType()
-export class MessagesResult {
-  @Field(() => [Message], { nullable: 'itemsAndList' })
-  messages: Message[];
+export class DMsResult {
+  @Field(() => [DirectMessage], { nullable: 'itemsAndList' })
+  messages: DirectMessage[];
 
   @Field({ nullable: true })
   nextCursor: string;
