@@ -1,15 +1,8 @@
-import { Inject, UseGuards } from '@nestjs/common';
-import {
-  Args,
-  Context,
-  Mutation,
-  Query,
-  Resolver,
-  Subscription,
-} from '@nestjs/graphql';
+import { /* Inject, */ UseGuards } from '@nestjs/common';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { ApolloError } from 'apollo-server-express';
 import { Request } from 'express';
-import { RedisPubSub } from 'graphql-redis-subscriptions';
+// import { RedisPubSub } from 'graphql-redis-subscriptions';
 
 import {
   CreateMessageDto,
@@ -19,7 +12,7 @@ import {
 import { Message, MessagesResult } from './message.types';
 
 import { GraphqlAuthGuard } from 'src/auth/auth.guard';
-import { REDIS_PUB_SUB } from 'src/redis-pubsub.provider';
+// import { REDIS_PUB_SUB } from 'src/redis-pubsub.provider';
 import { MessageService } from './message.service';
 
 @Resolver()
@@ -27,7 +20,7 @@ export class MessageResolver {
   constructor(
     private readonly messageService: MessageService,
 
-    @Inject(REDIS_PUB_SUB) private readonly pubSub: RedisPubSub,
+    // @Inject(REDIS_PUB_SUB) private readonly pubSub: RedisPubSub,
   ) {}
 
   @UseGuards(GraphqlAuthGuard)
@@ -45,10 +38,10 @@ export class MessageResolver {
 
       const message = await this.messageService.createMessage(input, userId);
 
-      this.pubSub.publish(`chat:${input.channelId}:messages`, {
-        message,
-        channelId: input.channelId,
-      });
+      // this.pubSub.publish(`chat:${input.channelId}:messages`, {
+      //   message,
+      //   channelId: input.channelId,
+      // });
 
       return message;
     } catch (error) {
@@ -71,10 +64,10 @@ export class MessageResolver {
 
       const message = await this.messageService.updateMessage(input, userId);
 
-      this.pubSub.publish(`chat:${input.channelId}:messages:update`, {
-        message,
-        channelId: input.channelId,
-      });
+      // this.pubSub.publish(`chat:${input.channelId}:messages:update`, {
+      //   message,
+      //   channelId: input.channelId,
+      // });
 
       return message;
     } catch (error) {
@@ -97,10 +90,10 @@ export class MessageResolver {
 
       const message = await this.messageService.deleteMessage(input, userId);
 
-      this.pubSub.publish(`chat:${input.channelId}:messages:delete`, {
-        message,
-        channelId: input.channelId,
-      });
+      // this.pubSub.publish(`chat:${input.channelId}:messages:delete`, {
+      //   message,
+      //   channelId: input.channelId,
+      // });
 
       return message;
     } catch (error) {
@@ -128,33 +121,33 @@ export class MessageResolver {
     }
   }
 
-  @Subscription(() => Message, {
-    nullable: true,
-    resolve: (payload: { message: Message }) => payload.message,
-  })
-  messageCreated(@Context() ctx: any, @Args('channelId') channelId: string) {
-    console.log('user.messageCreated', { req: ctx.req });
+  // @Subscription(() => Message, {
+  //   nullable: true,
+  //   resolve: (payload: { message: Message }) => payload.message,
+  // })
+  // messageCreated(@Context() ctx: any, @Args('channelId') channelId: string) {
+  //   console.log('user.messageCreated', { req: ctx.req });
 
-    return this.pubSub.asyncIterator(`chat:${channelId}:messages`);
-  }
+  //   return this.pubSub.asyncIterator(`chat:${channelId}:messages`);
+  // }
 
-  @Subscription(() => Message, {
-    nullable: true,
-    resolve: (payload: { message: Message }) => payload.message,
-  })
-  messageUpdated(@Context() ctx: any, @Args('channelId') channelId: string) {
-    console.log('user.messageUpdated', { req: ctx.req });
+  // @Subscription(() => Message, {
+  //   nullable: true,
+  //   resolve: (payload: { message: Message }) => payload.message,
+  // })
+  // messageUpdated(@Context() ctx: any, @Args('channelId') channelId: string) {
+  //   console.log('user.messageUpdated', { req: ctx.req });
 
-    return this.pubSub.asyncIterator(`chat:${channelId}:messages:update`);
-  }
+  //   return this.pubSub.asyncIterator(`chat:${channelId}:messages:update`);
+  // }
 
-  @Subscription(() => Message, {
-    nullable: true,
-    resolve: (payload: { message: Message }) => payload.message,
-  })
-  messageDeleted(@Context() ctx: any, @Args('channelId') channelId: string) {
-    console.log('user.messageDeleted', { req: ctx.req });
+  // @Subscription(() => Message, {
+  //   nullable: true,
+  //   resolve: (payload: { message: Message }) => payload.message,
+  // })
+  // messageDeleted(@Context() ctx: any, @Args('channelId') channelId: string) {
+  //   console.log('user.messageDeleted', { req: ctx.req });
 
-    return this.pubSub.asyncIterator(`chat:${channelId}:messages:delete`);
-  }
+  //   return this.pubSub.asyncIterator(`chat:${channelId}:messages:delete`);
+  // }
 }

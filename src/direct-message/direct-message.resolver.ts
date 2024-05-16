@@ -1,20 +1,13 @@
-import { Inject, UseGuards } from '@nestjs/common';
-import {
-  Args,
-  Context,
-  Mutation,
-  Query,
-  Resolver,
-  Subscription,
-} from '@nestjs/graphql';
+import { /* Inject, */ UseGuards } from '@nestjs/common';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { ApolloError } from 'apollo-server-express';
-import { RedisPubSub } from 'graphql-redis-subscriptions';
+// import { RedisPubSub } from 'graphql-redis-subscriptions';
 
 import { CreateDMDto, DeleteDMDto, UpdateDMDto } from './direct-message.dto';
 import { DMsResult, DirectMessage } from './direct-message.types';
 
 import { GraphqlAuthGuard } from 'src/auth/auth.guard';
-import { REDIS_PUB_SUB } from 'src/redis-pubsub.provider';
+// import { REDIS_PUB_SUB } from 'src/redis-pubsub.provider';
 import { DirectMessageService } from './direct-message.service';
 
 @Resolver()
@@ -22,7 +15,7 @@ export class DirectMessageResolver {
   constructor(
     private readonly dmService: DirectMessageService,
 
-    @Inject(REDIS_PUB_SUB) private readonly pubSub: RedisPubSub,
+    // @Inject(REDIS_PUB_SUB) private readonly pubSub: RedisPubSub,
   ) {}
 
   @UseGuards(GraphqlAuthGuard)
@@ -40,10 +33,10 @@ export class DirectMessageResolver {
 
       const message = await this.dmService.createDM(input, userId);
 
-      this.pubSub.publish(`chat:${input.conversationId}:messages`, {
-        message,
-        channelId: input.conversationId,
-      });
+      // this.pubSub.publish(`chat:${input.conversationId}:messages`, {
+      //   message,
+      //   channelId: input.conversationId,
+      // });
 
       return message;
     } catch (error) {
@@ -66,10 +59,10 @@ export class DirectMessageResolver {
 
       const message = await this.dmService.updateDM(input, userId);
 
-      this.pubSub.publish(`chat:${input.conversationId}:messages:update`, {
-        message,
-        channelId: input.conversationId,
-      });
+      // this.pubSub.publish(`chat:${input.conversationId}:messages:update`, {
+      //   message,
+      //   channelId: input.conversationId,
+      // });
 
       return message;
     } catch (error) {
@@ -92,10 +85,10 @@ export class DirectMessageResolver {
 
       const message = await this.dmService.deleteDM(input, userId);
 
-      this.pubSub.publish(`chat:${input.conversationId}:messages:delete`, {
-        message,
-        channelId: input.conversationId,
-      });
+      // this.pubSub.publish(`chat:${input.conversationId}:messages:delete`, {
+      //   message,
+      //   channelId: input.conversationId,
+      // });
 
       return message;
     } catch (error) {
@@ -123,42 +116,42 @@ export class DirectMessageResolver {
     }
   }
 
-  @Subscription(() => DirectMessage, {
-    nullable: true,
-    resolve: (payload: { message: DirectMessage }) => payload.message,
-  })
-  dmCreated(
-    @Context() ctx: any,
-    @Args('conversationId') conversationId: string,
-  ) {
-    console.log('user.dmCreated', { req: ctx.req });
+  // @Subscription(() => DirectMessage, {
+  //   nullable: true,
+  //   resolve: (payload: { message: DirectMessage }) => payload.message,
+  // })
+  // dmCreated(
+  //   @Context() ctx: any,
+  //   @Args('conversationId') conversationId: string,
+  // ) {
+  //   console.log('user.dmCreated', { req: ctx.req });
 
-    return this.pubSub.asyncIterator(`chat:${conversationId}:messages`);
-  }
+  //   return this.pubSub.asyncIterator(`chat:${conversationId}:messages`);
+  // }
 
-  @Subscription(() => DirectMessage, {
-    nullable: true,
-    resolve: (payload: { message: DirectMessage }) => payload.message,
-  })
-  dmUpdated(
-    @Context() ctx: any,
-    @Args('conversationId') conversationId: string,
-  ) {
-    console.log('user.dmUpdated', { req: ctx.req });
+  // @Subscription(() => DirectMessage, {
+  //   nullable: true,
+  //   resolve: (payload: { message: DirectMessage }) => payload.message,
+  // })
+  // dmUpdated(
+  //   @Context() ctx: any,
+  //   @Args('conversationId') conversationId: string,
+  // ) {
+  //   console.log('user.dmUpdated', { req: ctx.req });
 
-    return this.pubSub.asyncIterator(`chat:${conversationId}:messages:update`);
-  }
+  //   return this.pubSub.asyncIterator(`chat:${conversationId}:messages:update`);
+  // }
 
-  @Subscription(() => DirectMessage, {
-    nullable: true,
-    resolve: (payload: { message: DirectMessage }) => payload.message,
-  })
-  dmDeleted(
-    @Context() ctx: any,
-    @Args('conversationId') conversationId: string,
-  ) {
-    console.log('user.dmDeleted', { req: ctx.req });
+  // @Subscription(() => DirectMessage, {
+  //   nullable: true,
+  //   resolve: (payload: { message: DirectMessage }) => payload.message,
+  // })
+  // dmDeleted(
+  //   @Context() ctx: any,
+  //   @Args('conversationId') conversationId: string,
+  // ) {
+  //   console.log('user.dmDeleted', { req: ctx.req });
 
-    return this.pubSub.asyncIterator(`chat:${conversationId}:messages:delete`);
-  }
+  //   return this.pubSub.asyncIterator(`chat:${conversationId}:messages:delete`);
+  // }
 }
