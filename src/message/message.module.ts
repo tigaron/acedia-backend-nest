@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 import { PrismaService } from 'src/prisma.service';
-import { redisPubSubProvider } from 'src/redis-pubsub.provider';
+// import { redisPubSubProvider } from 'src/redis-pubsub.provider';
 import { MessageResolver } from './message.resolver';
 import { MessageService } from './message.service';
 
@@ -12,7 +12,7 @@ import { MessageService } from './message.service';
     MessageResolver,
     PrismaService,
     JwtService,
-    redisPubSubProvider,
+    // redisPubSubProvider,
   ],
 })
 export class MessageModule {}
